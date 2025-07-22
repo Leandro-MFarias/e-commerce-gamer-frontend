@@ -4,6 +4,7 @@ import {
   RegisterSchema,
   registerSchema,
 } from "@/app/validators/registerSchema";
+import { createAccount } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronLeft,
@@ -22,7 +23,7 @@ export default function Login() {
   const router = useRouter();
   const {
     register,
-    // setError,
+    setError,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterSchema>({
@@ -31,8 +32,15 @@ export default function Login() {
 
   async function handleForm(data: RegisterSchema) {
     try {
-      console.log(data);
-      // router.push("/");
+      const response = await createAccount(data);
+      const result = await response.json();
+
+      if (response.status === 400) {
+        setError("email", { message: result.message });
+        return;
+      }
+
+      router.push("/");
     } catch (error) {
       console.log(error);
     }
@@ -104,7 +112,7 @@ export default function Login() {
                   type={`${showPassword ? "text" : "password"}`}
                   id="password"
                   {...register("password")}
-                  className="w-full rounded-sm border-2 border-zinc-400 px-2 py-3 text-zinc-400 outline-none pr-10"
+                  className="w-full rounded-sm border-2 border-zinc-400 px-2 py-3 pr-10 text-zinc-400 outline-none"
                 />
                 <button
                   type="button"
@@ -129,7 +137,7 @@ export default function Login() {
                   type={`${showPassword ? "text" : "password"}`}
                   id="confirm"
                   {...register("confirm")}
-                  className="w-full rounded-sm border-2 border-zinc-400 px-2 py-3 text-zinc-400 outline-none pr-10"
+                  className="w-full rounded-sm border-2 border-zinc-400 px-2 py-3 pr-10 text-zinc-400 outline-none"
                 />
                 <button
                   type="button"
